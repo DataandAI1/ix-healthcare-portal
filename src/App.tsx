@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ChevronLeft, Send, MoreVertical, Download, Menu, X, ChevronRight, Globe, Play, CheckCircle, ArrowUpRight } from 'lucide-react';
+import { ChevronLeft, Send, MoreVertical, Download, Menu, X, ChevronRight, Globe, Play, CheckCircle, ArrowUpRight, ChevronDown, FileText, Users, TrendingUp, BarChart3 } from 'lucide-react';
 
 // Type definitions
 interface NavLink {
@@ -30,17 +30,27 @@ interface Invoice {
   status: string;
 }
 
+interface ClientResearchLink {
+  id: string;
+  name: string;
+  description: string;
+  url: string;
+  category: string;
+}
+
 // Main Healthcare Portal Component
 const IXHealthcarePortal: React.FC = () => {
   const [activePage, setActivePage] = useState('dashboard');
   const [activeTab, setActiveTab] = useState(0);
   const [activePill, setActivePill] = useState('overview');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
 
   const navLinks: NavLink[] = [
     { id: 'dashboard', label: 'Dashboard', page: 'dashboard' },
     { id: 'solutions', label: 'Solutions', page: 'solutions' },
-    { id: 'account', label: 'Account', page: 'account' }
+    { id: 'account', label: 'Account', page: 'account' },
+    { id: 'internal', label: '(Internal)', page: 'internal' }
   ];
 
   const teamMembers: TeamMember[] = [
@@ -81,6 +91,11 @@ const IXHealthcarePortal: React.FC = () => {
     { id: 'INV-2025-024', date: 'June 15, 2025', amount: '$12,400.00', service: 'CCaaS Implementation', status: 'Paid' },
     { id: 'INV-2025-023', date: 'June 1, 2025', amount: '$8,750.00', service: 'AI Model Training', status: 'Paid' },
     { id: 'INV-2025-022', date: 'May 15, 2025', amount: '$4,200.00', service: 'Analytics Dashboard', status: 'Paid' }
+  ];
+
+  const clientResearchLinks: ClientResearchLink[] = [
+    // Placeholder for future client research links
+    // These will be populated from Google Drive or Asana
   ];
 
   const tabs = ['Performance Benchmarks', 'Patient Experience', 'AI-Enabled Efficiency'];
@@ -1071,6 +1086,162 @@ const IXHealthcarePortal: React.FC = () => {
           color: var(--pure-white);
         }
 
+        /* Internal Page Styles */
+        .internal-page-container {
+          padding-top: calc(72px + var(--spacing-2xl));
+        }
+
+        .internal-hero {
+          background: linear-gradient(180deg, var(--deep-navy) 0%, rgba(26, 38, 66, 0.95) 100%);
+          padding: var(--spacing-2xl) 0;
+          margin-bottom: var(--spacing-2xl);
+          color: var(--pure-white);
+        }
+
+        .internal-hero-content {
+          max-width: 1200px;
+          margin: 0 auto;
+          padding: 0 var(--spacing-lg);
+        }
+
+        .internal-title {
+          font-size: 40px;
+          font-weight: 700;
+          margin-bottom: var(--spacing-md);
+        }
+
+        .internal-subtitle {
+          font-size: 20px;
+          opacity: 0.9;
+        }
+
+        .dropdown-container {
+          position: relative;
+          margin-bottom: var(--spacing-2xl);
+        }
+
+        .dropdown-button {
+          width: 100%;
+          max-width: 600px;
+          padding: var(--spacing-md);
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          background-color: var(--pure-white);
+          border: 2px solid var(--border-color);
+          border-radius: 8px;
+          cursor: pointer;
+          transition: all var(--transition-base);
+          font-size: 16px;
+          font-weight: 600;
+          color: var(--dark-gray);
+        }
+
+        .dropdown-button:hover {
+          border-color: var(--ix-green);
+        }
+
+        .dropdown-button.active {
+          border-color: var(--ix-green);
+          box-shadow: 0 0 0 4px rgba(0, 212, 170, 0.1);
+        }
+
+        .dropdown-menu {
+          position: absolute;
+          top: 100%;
+          left: 0;
+          right: 0;
+          max-width: 600px;
+          margin-top: var(--spacing-sm);
+          background-color: var(--pure-white);
+          border: 1px solid var(--border-color);
+          border-radius: 8px;
+          box-shadow: var(--shadow-md);
+          display: none;
+          z-index: 100;
+        }
+
+        .dropdown-menu.active {
+          display: block;
+        }
+
+        .dropdown-item {
+          padding: var(--spacing-md);
+          border-bottom: 1px solid var(--border-color);
+          cursor: pointer;
+          transition: background-color var(--transition-base);
+        }
+
+        .dropdown-item:last-child {
+          border-bottom: none;
+        }
+
+        .dropdown-item:hover {
+          background-color: var(--light-gray);
+        }
+
+        .dropdown-item-title {
+          font-weight: 600;
+          color: var(--dark-gray);
+          margin-bottom: var(--spacing-xs);
+        }
+
+        .dropdown-item-description {
+          font-size: 14px;
+          color: var(--medium-gray);
+        }
+
+        .empty-state {
+          text-align: center;
+          padding: var(--spacing-3xl);
+          color: var(--medium-gray);
+        }
+
+        .empty-state-icon {
+          font-size: 64px;
+          margin-bottom: var(--spacing-md);
+          opacity: 0.5;
+        }
+
+        .internal-grid {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: var(--spacing-lg);
+        }
+
+        .stat-card {
+          background-color: var(--pure-white);
+          border-radius: 8px;
+          padding: var(--spacing-xl);
+          box-shadow: var(--shadow-sm);
+          text-align: center;
+        }
+
+        .stat-icon {
+          width: 64px;
+          height: 64px;
+          background: linear-gradient(135deg, var(--ix-green), var(--ix-green-dark));
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: var(--pure-white);
+          font-size: 28px;
+          margin: 0 auto var(--spacing-md);
+        }
+
+        .stat-value {
+          font-size: 36px;
+          font-weight: 700;
+          color: var(--dark-gray);
+          margin-bottom: var(--spacing-xs);
+        }
+
+        .stat-label {
+          font-size: 16px;
+          color: var(--medium-gray);
+        }
+
         /* Responsive */
         @media (max-width: 1024px) {
           .dashboard-grid {
@@ -1079,7 +1250,8 @@ const IXHealthcarePortal: React.FC = () => {
 
           .content-grid,
           .grid-2,
-          .services-grid {
+          .services-grid,
+          .internal-grid {
             grid-template-columns: 1fr;
           }
 
@@ -1112,6 +1284,10 @@ const IXHealthcarePortal: React.FC = () => {
 
           .user-info {
             display: none;
+          }
+
+          .internal-title {
+            font-size: 32px;
           }
         }
       `}</style>
@@ -1468,6 +1644,136 @@ const IXHealthcarePortal: React.FC = () => {
                 ))}
               </tbody>
             </table>
+          </div>
+        </div>
+      </div>
+
+      {/* Internal Page */}
+      <div className={`page ${activePage === 'internal' ? 'active' : ''}`}>
+        <div className="internal-page-container">
+          <div className="internal-hero">
+            <div className="internal-hero-content">
+              <h1 className="internal-title">Internal Client Management</h1>
+              <p className="internal-subtitle">Access client research, reports, and management resources</p>
+            </div>
+          </div>
+
+          <div className="main-container">
+            {/* Client Research Dropdown */}
+            <div className="section-header">
+              <h2 className="section-title">Client Research & Resources</h2>
+              <p className="section-subtitle">Access comprehensive client research documents and insights</p>
+            </div>
+
+            <div className="dropdown-container">
+              <button 
+                className={`dropdown-button ${dropdownOpen ? 'active' : ''}`}
+                onClick={() => setDropdownOpen(!dropdownOpen)}
+              >
+                <span>Select Client Research Category</span>
+                <ChevronDown className={`w-5 h-5 transition-transform ${dropdownOpen ? 'rotate-180' : ''}`} />
+              </button>
+
+              <div className={`dropdown-menu ${dropdownOpen ? 'active' : ''}`}>
+                {clientResearchLinks.length > 0 ? (
+                  clientResearchLinks.map((link) => (
+                    <div key={link.id} className="dropdown-item">
+                      <div className="dropdown-item-title">{link.name}</div>
+                      <div className="dropdown-item-description">{link.description}</div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="dropdown-item">
+                    <div className="empty-state">
+                      <div className="empty-state-icon">📂</div>
+                      <div className="dropdown-item-title">No research links available</div>
+                      <div className="dropdown-item-description">Client research links will be added here soon</div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Internal Stats */}
+            <div className="section-header" style={{ marginTop: 'var(--spacing-3xl)' }}>
+              <h2 className="section-title">Client Management Overview</h2>
+              <p className="section-subtitle">Key metrics and insights for internal team</p>
+            </div>
+
+            <div className="internal-grid">
+              <div className="stat-card">
+                <div className="stat-icon">
+                  <Users className="w-8 h-8" />
+                </div>
+                <div className="stat-value">12</div>
+                <div className="stat-label">Active Healthcare Clients</div>
+              </div>
+
+              <div className="stat-card">
+                <div className="stat-icon">
+                  <FileText className="w-8 h-8" />
+                </div>
+                <div className="stat-value">48</div>
+                <div className="stat-label">Research Documents</div>
+              </div>
+
+              <div className="stat-card">
+                <div className="stat-icon">
+                  <TrendingUp className="w-8 h-8" />
+                </div>
+                <div className="stat-value">94%</div>
+                <div className="stat-label">Client Satisfaction Score</div>
+              </div>
+
+              <div className="stat-card">
+                <div className="stat-icon">
+                  <BarChart3 className="w-8 h-8" />
+                </div>
+                <div className="stat-value">28</div>
+                <div className="stat-label">Active Projects</div>
+              </div>
+            </div>
+
+            {/* Additional Resources */}
+            <div className="section-header" style={{ marginTop: 'var(--spacing-3xl)' }}>
+              <h2 className="section-title">Quick Links</h2>
+              <p className="section-subtitle">Frequently accessed internal resources</p>
+            </div>
+
+            <div className="grid-3">
+              <div className="card">
+                <div className="card-icon">
+                  <FileText className="w-6 h-6" />
+                </div>
+                <h3 className="card-title">Client Onboarding Guide</h3>
+                <p className="card-description">
+                  Standard procedures and checklists for new healthcare client onboarding
+                </p>
+                <button className="btn btn-secondary">View Guide</button>
+              </div>
+
+              <div className="card">
+                <div className="card-icon">
+                  <BarChart3 className="w-6 h-6" />
+                </div>
+                <h3 className="card-title">Performance Dashboards</h3>
+                <p className="card-description">
+                  Real-time client performance metrics and KPI tracking
+                </p>
+                <button className="btn btn-secondary">Access Dashboards</button>
+              </div>
+
+              <div className="card">
+                <div className="card-icon">
+                  <Users className="w-6 h-6" />
+                </div>
+                <h3 className="card-title">Team Resources</h3>
+                <p className="card-description">
+                  Internal documentation, templates, and collaboration tools
+                </p>
+                <button className="btn btn-secondary">Browse Resources</button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
