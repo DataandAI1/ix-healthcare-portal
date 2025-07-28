@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { ChevronLeft, Send, MoreVertical, Download, Menu, X, ChevronRight, Globe, Play, CheckCircle, ArrowUpRight, ChevronDown, FileText, Users, TrendingUp, BarChart3 } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { ChevronLeft, Send, MoreVertical, Download, Menu, X, ChevronRight, Globe, Play, CheckCircle, ArrowUpRight, ChevronDown, FileText, Users, TrendingUp, BarChart3, Database, Search, Filter, Calendar, ExternalLink, Loader } from 'lucide-react';
 
 // Type definitions
 interface NavLink {
@@ -38,6 +38,61 @@ interface ClientResearchLink {
   category: string;
 }
 
+// Research Data Types (from Prisma schema)
+interface ResearchData {
+  id: string;
+  title: string;
+  category: string;
+  client: string;
+  date: string;
+  summary: string;
+  tags: string[];
+  metrics?: {
+    impact?: string;
+    satisfaction?: number;
+    implementation?: string;
+  };
+  documents?: {
+    name: string;
+    type: string;
+    url: string;
+  }[];
+}
+
+interface ResearchFilters {
+  category: string;
+  client: string;
+  dateRange: string;
+  searchTerm: string;
+}
+
+// API Service (would connect to your backend/Prisma)
+const ResearchAPI = {
+  async fetchResearchData(filters: ResearchFilters): Promise<ResearchData[]> {
+    // This would be replaced with actual API call to your backend
+    // Example: const response = await fetch('/api/research', { method: 'POST', body: JSON.stringify(filters) });
+    // return response.json();
+    
+    // Simulating API delay
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    // Return empty array - data will come from your Prisma database
+    return [];
+  },
+  
+  async fetchCategories(): Promise<string[]> {
+    // This would fetch from your database
+    await new Promise(resolve => setTimeout(resolve, 500));
+    return [];
+  },
+  
+  async fetchClients(): Promise<string[]> {
+    // This would fetch from your database
+    await new Promise(resolve => setTimeout(resolve, 500));
+    return [];
+  }
+};
+
 // Main Healthcare Portal Component
 const IXHealthcarePortal: React.FC = () => {
   const [activePage, setActivePage] = useState('dashboard');
@@ -45,6 +100,19 @@ const IXHealthcarePortal: React.FC = () => {
   const [activePill, setActivePill] = useState('overview');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  
+  // Research Microsite State
+  const [researchData, setResearchData] = useState<ResearchData[]>([]);
+  const [isLoadingResearch, setIsLoadingResearch] = useState(false);
+  const [researchFilters, setResearchFilters] = useState<ResearchFilters>({
+    category: 'all',
+    client: 'all',
+    dateRange: 'all',
+    searchTerm: ''
+  });
+  const [categories, setCategories] = useState<string[]>([]);
+  const [clients, setClients] = useState<string[]>([]);
+  const [showFilters, setShowFilters] = useState(true);
 
   const navLinks: NavLink[] = [
     { id: 'dashboard', label: 'Dashboard', page: 'dashboard' },
@@ -103,6 +171,46 @@ const IXHealthcarePortal: React.FC = () => {
   const navigateTo = (page: string) => {
     setActivePage(page);
     setMobileMenuOpen(false);
+  };
+
+  // Load research data when microsite is accessed
+  useEffect(() => {
+    if (activePage === 'research-microsite') {
+      loadResearchData();
+      loadFilterOptions();
+    }
+  }, [activePage, researchFilters]);
+
+  const loadResearchData = async () => {
+    setIsLoadingResearch(true);
+    try {
+      const data = await ResearchAPI.fetchResearchData(researchFilters);
+      setResearchData(data);
+    } catch (error) {
+      console.error('Error loading research data:', error);
+    } finally {
+      setIsLoadingResearch(false);
+    }
+  };
+
+  const loadFilterOptions = async () => {
+    try {
+      const [categoriesData, clientsData] = await Promise.all([
+        ResearchAPI.fetchCategories(),
+        ResearchAPI.fetchClients()
+      ]);
+      setCategories(categoriesData);
+      setClients(clientsData);
+    } catch (error) {
+      console.error('Error loading filter options:', error);
+    }
+  };
+
+  const handleFilterChange = (filterType: keyof ResearchFilters, value: string) => {
+    setResearchFilters(prev => ({
+      ...prev,
+      [filterType]: value
+    }));
   };
 
   return (
@@ -1242,6 +1350,252 @@ const IXHealthcarePortal: React.FC = () => {
           color: var(--medium-gray);
         }
 
+        /* Research Microsite Styles */
+        .research-microsite-container {
+          padding-top: calc(72px + var(--spacing-2xl));
+          min-height: 100vh;
+          background-color: var(--light-gray);
+        }
+
+        .research-header {
+          background: linear-gradient(180deg, var(--deep-navy) 0%, rgba(26, 38, 66, 0.95) 100%);
+          padding: var(--spacing-2xl) 0;
+          margin-bottom: var(--spacing-2xl);
+          color: var(--pure-white);
+        }
+
+        .research-header-content {
+          max-width: 1200px;
+          margin: 0 auto;
+          padding: 0 var(--spacing-lg);
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+
+        .research-title {
+          font-size: 36px;
+          font-weight: 700;
+          margin-bottom: var(--spacing-sm);
+        }
+
+        .research-subtitle {
+          font-size: 18px;
+          opacity: 0.9;
+        }
+
+        .research-filters {
+          background-color: var(--pure-white);
+          border-radius: 8px;
+          padding: var(--spacing-lg);
+          box-shadow: var(--shadow-sm);
+          margin-bottom: var(--spacing-lg);
+        }
+
+        .filter-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: var(--spacing-md);
+        }
+
+        .filter-title {
+          font-size: 18px;
+          font-weight: 600;
+          color: var(--dark-gray);
+          display: flex;
+          align-items: center;
+          gap: var(--spacing-sm);
+        }
+
+        .filter-toggle {
+          background: none;
+          border: none;
+          color: var(--ix-green);
+          cursor: pointer;
+          font-size: 14px;
+          font-weight: 600;
+          transition: color var(--transition-base);
+        }
+
+        .filter-toggle:hover {
+          color: var(--ix-green-dark);
+        }
+
+        .filter-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+          gap: var(--spacing-md);
+        }
+
+        .filter-group {
+          display: flex;
+          flex-direction: column;
+          gap: var(--spacing-sm);
+        }
+
+        .filter-label {
+          font-size: 14px;
+          font-weight: 600;
+          color: var(--medium-gray);
+        }
+
+        .filter-select, .filter-input {
+          width: 100%;
+          padding: var(--spacing-sm);
+          border: 1px solid var(--border-color);
+          border-radius: 4px;
+          font-size: 14px;
+          transition: border-color var(--transition-base);
+        }
+
+        .filter-select:focus, .filter-input:focus {
+          outline: none;
+          border-color: var(--ix-green);
+        }
+
+        .research-results {
+          min-height: 400px;
+        }
+
+        .research-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+          gap: var(--spacing-lg);
+        }
+
+        .research-card {
+          background-color: var(--pure-white);
+          border-radius: 8px;
+          padding: var(--spacing-lg);
+          box-shadow: var(--shadow-sm);
+          transition: all var(--transition-base);
+          cursor: pointer;
+          border: 1px solid transparent;
+        }
+
+        .research-card:hover {
+          transform: translateY(-2px);
+          box-shadow: var(--shadow-md);
+          border-color: var(--ix-green);
+        }
+
+        .research-card-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+          margin-bottom: var(--spacing-md);
+        }
+
+        .research-card-title {
+          font-size: 18px;
+          font-weight: 700;
+          color: var(--dark-gray);
+          margin-bottom: var(--spacing-xs);
+        }
+
+        .research-card-meta {
+          display: flex;
+          gap: var(--spacing-md);
+          font-size: 12px;
+          color: var(--medium-gray);
+          margin-bottom: var(--spacing-md);
+        }
+
+        .research-card-summary {
+          font-size: 14px;
+          color: var(--dark-gray);
+          line-height: 1.6;
+          margin-bottom: var(--spacing-md);
+        }
+
+        .research-card-tags {
+          display: flex;
+          gap: var(--spacing-sm);
+          flex-wrap: wrap;
+          margin-bottom: var(--spacing-md);
+        }
+
+        .research-card-metrics {
+          display: flex;
+          gap: var(--spacing-lg);
+          padding-top: var(--spacing-md);
+          border-top: 1px solid var(--border-color);
+        }
+
+        .research-metric {
+          flex: 1;
+          text-align: center;
+        }
+
+        .research-metric-value {
+          font-size: 20px;
+          font-weight: 700;
+          color: var(--ix-green);
+        }
+
+        .research-metric-label {
+          font-size: 12px;
+          color: var(--medium-gray);
+        }
+
+        .research-documents {
+          margin-top: var(--spacing-md);
+          padding-top: var(--spacing-md);
+          border-top: 1px solid var(--border-color);
+        }
+
+        .research-document {
+          display: flex;
+          align-items: center;
+          gap: var(--spacing-sm);
+          padding: var(--spacing-xs) 0;
+          color: var(--ix-green);
+          font-size: 14px;
+          text-decoration: none;
+          transition: color var(--transition-base);
+        }
+
+        .research-document:hover {
+          color: var(--ix-green-dark);
+        }
+
+        .loading-container {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          padding: var(--spacing-4xl);
+          color: var(--medium-gray);
+        }
+
+        .loading-spinner {
+          animation: spin 1s linear infinite;
+          color: var(--ix-green);
+          margin-bottom: var(--spacing-md);
+        }
+
+        @keyframes spin {
+          from {
+            transform: rotate(0deg);
+          }
+          to {
+            transform: rotate(360deg);
+          }
+        }
+
+        .no-results {
+          text-align: center;
+          padding: var(--spacing-4xl);
+          color: var(--medium-gray);
+        }
+
+        .no-results-icon {
+          font-size: 64px;
+          margin-bottom: var(--spacing-md);
+          opacity: 0.5;
+        }
+
         /* Responsive */
         @media (max-width: 1024px) {
           .dashboard-grid {
@@ -1267,6 +1621,12 @@ const IXHealthcarePortal: React.FC = () => {
           .metrics-content {
             grid-template-columns: 1fr;
           }
+
+          .research-header-content {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: var(--spacing-md);
+          }
         }
 
         @media (max-width: 768px) {
@@ -1288,6 +1648,14 @@ const IXHealthcarePortal: React.FC = () => {
 
           .internal-title {
             font-size: 32px;
+          }
+
+          .research-grid {
+            grid-template-columns: 1fr;
+          }
+
+          .filter-grid {
+            grid-template-columns: 1fr;
           }
         }
       `}</style>
@@ -1765,14 +2133,203 @@ const IXHealthcarePortal: React.FC = () => {
 
               <div className="card">
                 <div className="card-icon">
-                  <Users className="w-6 h-6" />
+                  <Database className="w-6 h-6" />
                 </div>
-                <h3 className="card-title">Team Resources</h3>
+                <h3 className="card-title">Research Data Portal</h3>
                 <p className="card-description">
-                  Internal documentation, templates, and collaboration tools
+                  Access comprehensive healthcare research data and analytics
                 </p>
-                <button className="btn btn-secondary">Browse Resources</button>
+                <button 
+                  className="btn btn-primary"
+                  onClick={() => navigateTo('research-microsite')}
+                >
+                  Open Portal <ExternalLink className="w-4 h-4" />
+                </button>
               </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Research Microsite Page */}
+      <div className={`page ${activePage === 'research-microsite' ? 'active' : ''}`}>
+        <div className="research-microsite-container">
+          <div className="research-header">
+            <div className="research-header-content">
+              <div>
+                <button 
+                  className="back-link"
+                  onClick={() => navigateTo('internal')}
+                >
+                  <ChevronLeft className="w-4 h-4" /> Back to Internal
+                </button>
+                <h1 className="research-title">Healthcare Research Data Portal</h1>
+                <p className="research-subtitle">Comprehensive insights from our healthcare research database</p>
+              </div>
+              <div className="btn btn-primary">
+                <Database className="w-5 h-5" />
+                Connected to Prisma DB
+              </div>
+            </div>
+          </div>
+
+          <div className="main-container">
+            {/* Filters */}
+            <div className="research-filters">
+              <div className="filter-header">
+                <h3 className="filter-title">
+                  <Filter className="w-5 h-5" />
+                  Filter Research Data
+                </h3>
+                <button 
+                  className="filter-toggle"
+                  onClick={() => setShowFilters(!showFilters)}
+                >
+                  {showFilters ? 'Hide Filters' : 'Show Filters'}
+                </button>
+              </div>
+              
+              {showFilters && (
+                <div className="filter-grid">
+                  <div className="filter-group">
+                    <label className="filter-label">Category</label>
+                    <select 
+                      className="filter-select"
+                      value={researchFilters.category}
+                      onChange={(e) => handleFilterChange('category', e.target.value)}
+                    >
+                      <option value="all">All Categories</option>
+                      {categories.map(cat => (
+                        <option key={cat} value={cat}>{cat}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="filter-group">
+                    <label className="filter-label">Client</label>
+                    <select 
+                      className="filter-select"
+                      value={researchFilters.client}
+                      onChange={(e) => handleFilterChange('client', e.target.value)}
+                    >
+                      <option value="all">All Clients</option>
+                      {clients.map(client => (
+                        <option key={client} value={client}>{client}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="filter-group">
+                    <label className="filter-label">Date Range</label>
+                    <select 
+                      className="filter-select"
+                      value={researchFilters.dateRange}
+                      onChange={(e) => handleFilterChange('dateRange', e.target.value)}
+                    >
+                      <option value="all">All Time</option>
+                      <option value="last30">Last 30 Days</option>
+                      <option value="last90">Last 90 Days</option>
+                      <option value="last365">Last Year</option>
+                    </select>
+                  </div>
+
+                  <div className="filter-group">
+                    <label className="filter-label">Search</label>
+                    <div style={{ position: 'relative' }}>
+                      <input 
+                        type="text"
+                        className="filter-input"
+                        placeholder="Search research..."
+                        value={researchFilters.searchTerm}
+                        onChange={(e) => handleFilterChange('searchTerm', e.target.value)}
+                        style={{ paddingLeft: '36px' }}
+                      />
+                      <Search className="w-4 h-4" style={{
+                        position: 'absolute',
+                        left: '12px',
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        color: 'var(--medium-gray)'
+                      }} />
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Results */}
+            <div className="research-results">
+              {isLoadingResearch ? (
+                <div className="loading-container">
+                  <Loader className="w-12 h-12 loading-spinner" />
+                  <p>Loading research data from database...</p>
+                </div>
+              ) : researchData.length > 0 ? (
+                <div className="research-grid">
+                  {researchData.map((item) => (
+                    <div key={item.id} className="research-card">
+                      <div className="research-card-header">
+                        <h3 className="research-card-title">{item.title}</h3>
+                        <span className="tag">{item.category}</span>
+                      </div>
+                      
+                      <div className="research-card-meta">
+                        <span><Calendar className="w-3 h-3" style={{ display: 'inline', marginRight: '4px' }} />{item.date}</span>
+                        <span>{item.client}</span>
+                      </div>
+
+                      <p className="research-card-summary">{item.summary}</p>
+
+                      <div className="research-card-tags">
+                        {item.tags.map((tag, i) => (
+                          <span key={i} className="tag">{tag}</span>
+                        ))}
+                      </div>
+
+                      {item.metrics && (
+                        <div className="research-card-metrics">
+                          {item.metrics.impact && (
+                            <div className="research-metric">
+                              <div className="research-metric-value">{item.metrics.impact}</div>
+                              <div className="research-metric-label">Impact</div>
+                            </div>
+                          )}
+                          {item.metrics.satisfaction && (
+                            <div className="research-metric">
+                              <div className="research-metric-value">{item.metrics.satisfaction}%</div>
+                              <div className="research-metric-label">Satisfaction</div>
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {item.documents && item.documents.length > 0 && (
+                        <div className="research-documents">
+                          {item.documents.map((doc, i) => (
+                            <a key={i} href={doc.url} className="research-document">
+                              <FileText className="w-4 h-4" />
+                              {doc.name}
+                            </a>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="no-results">
+                  <div className="no-results-icon">
+                    <Database className="w-16 h-16" />
+                  </div>
+                  <h3 style={{ fontSize: '20px', fontWeight: '600', marginBottom: 'var(--spacing-sm)' }}>
+                    No Research Data Available
+                  </h3>
+                  <p>Research data will be populated from your Prisma database</p>
+                  <p style={{ fontSize: '14px', marginTop: 'var(--spacing-md)' }}>
+                    Connect your backend API to fetch data from Postgres
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         </div>
