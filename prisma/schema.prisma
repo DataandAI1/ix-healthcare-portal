@@ -1,0 +1,102 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Companies table
+model Company {
+  id               Int               @id @default(autoincrement())
+  name             String            @unique
+  industry         String?
+  createdAt        DateTime          @default(now()) @map("created_at")
+  updatedAt        DateTime          @updatedAt @map("updated_at")
+  researchProjects ResearchProject[]
+
+  @@map("companies")
+}
+
+// Research projects table
+model ResearchProject {
+  id               Int               @id @default(autoincrement())
+  title            String
+  summary          String?
+  category         String?
+  clientId         Int?              @map("client_id")
+  startDate        DateTime?         @map("start_date") @db.Date
+  endDate          DateTime?         @map("end_date") @db.Date
+  status           String?
+  createdAt        DateTime          @default(now()) @map("created_at")
+  updatedAt        DateTime          @updatedAt @map("updated_at")
+  
+  // Relations
+  client           Company?          @relation(fields: [clientId], references: [id])
+  projectTags      ProjectTag[]
+  researchMetrics  ResearchMetrics[]
+  documents        ResearchDocument[]
+
+  @@map("research_projects")
+}
+
+// Tags table
+model Tag {
+  id          Int          @id @default(autoincrement())
+  name        String       @unique
+  createdAt   DateTime     @default(now()) @map("created_at")
+  projectTags ProjectTag[]
+
+  @@map("tags")
+}
+
+// Project tags junction table (many-to-many)
+model ProjectTag {
+  projectId Int              @map("project_id")
+  tagId     Int              @map("tag_id")
+  createdAt DateTime         @default(now()) @map("created_at")
+  
+  // Relations
+  project   ResearchProject  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  tag       Tag              @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([projectId, tagId])
+  @@map("project_tags")
+}
+
+// Research metrics table
+model ResearchMetrics {
+  id                   Int              @id @default(autoincrement())
+  projectId            Int              @map("project_id")
+  impact               String?
+  satisfactionScore    Int?             @map("satisfaction_score")
+  implementationStatus String?          @map("implementation_status")
+  createdAt            DateTime         @default(now()) @map("created_at")
+  updatedAt            DateTime         @updatedAt @map("updated_at")
+  
+  // Relations
+  project              ResearchProject  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@map("research_metrics")
+}
+
+// Research documents table
+model ResearchDocument {
+  id          Int              @id @default(autoincrement())
+  projectId   Int              @map("project_id")
+  title       String
+  driveId     String?          @map("drive_id")
+  driveUrl    String?          @map("drive_url")
+  docType     String?          @map("doc_type")
+  createdAt   DateTime         @default(now()) @map("created_at")
+  updatedAt   DateTime         @updatedAt @map("updated_at")
+  
+  // Relations
+  project     ResearchProject  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@map("research_documents")
+}
